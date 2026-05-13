@@ -4,7 +4,7 @@
   "description": "Agent skill for creating, rendering, and validating Excalidraw architecture and workflow diagrams in Claude Code, Codex, Gemini CLI, Cursor, Windsurf, Copilot, Kiro, Roo Code, and more.",
   "type": "module",
   "bin": {
-    "excalidraw-skill": "./bin/excalidraw-skill.js"
+    "excalidraw-skill": "bin/excalidraw-skill.js"
   },
   "files": [
     "bin",
