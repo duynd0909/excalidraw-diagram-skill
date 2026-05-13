@@ -1,59 +1,16 @@
 #!/usr/bin/env node
 
-import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const packageRoot = path.resolve(__dirname, "..");
-const skillName = "excalidraw-diagram";
-const sourceSkillDir = path.join(packageRoot, "skills", skillName);
-const supportedAssistants = {
-  codex: {
-    label: "Codex",
-    projectSkillsDir: [".codex", "skills"],
-    globalBaseEnv: "CODEX_HOME",
-    globalBaseDir: ".codex",
-  },
-  claude: {
-    label: "Claude Code",
-    projectSkillsDir: [".claude", "skills"],
-    globalBaseEnv: "CLAUDE_HOME",
-    globalBaseDir: ".claude",
-  },
-  gemini: {
-    label: "Gemini CLI",
-    projectSkillsDir: [".gemini", "skills"],
-    globalBaseEnv: "GEMINI_HOME",
-    globalBaseDir: ".gemini",
-  },
-};
 
-function printHelp() {
-  console.log(`Excalidraw Diagram Skill installer
-
-Usage:
-  excalidraw-diagram-skill install [options]
-  excalidraw-skill install [options]
-
-Options:
-  --ai <name>       Target assistant: codex, claude, gemini, or all. Default: codex
-  --global          Install to the assistant's global skills directory
-  --target <dir>    Install into a custom skills directory. Not valid with --ai all
-  --force           Overwrite an existing excalidraw-diagram skill
-  --dry-run         Show what would happen without copying files
-  -h, --help        Show this help
-
-Examples:
-  npx excalidraw-diagram-skill install
-  npx excalidraw-diagram-skill install --ai claude
-  npx excalidraw-diagram-skill install --ai gemini
-  npx excalidraw-diagram-skill install --ai all
-  npx excalidraw-diagram-skill install --global
-  npx excalidraw-diagram-skill install --target ~/.codex/skills --force
-`);
+function isInteractive(argv) {
+  return (
+    argv.length === 0 ||
+    (argv.length === 1 && (argv[0] === "install" || argv[0] === "init"))
+  );
 }
 
 function parseArgs(argv) {
@@ -64,6 +21,7 @@ function parseArgs(argv) {
     global: false,
     force: false,
     dryRun: false,
+    setupRenderer: false,
     target: null,
     help: false,
   };
@@ -87,6 +45,9 @@ function parseArgs(argv) {
       case "--force":
         options.force = true;
         break;
+      case "--setup-renderer":
+        options.setupRenderer = true;
+        break;
       case "--dry-run":
         options.dryRun = true;
         break;
@@ -102,120 +63,48 @@ function parseArgs(argv) {
   return options;
 }
 
-function expandHome(inputPath) {
-  if (!inputPath) return inputPath;
-  if (inputPath === "~") return os.homedir();
-  if (inputPath.startsWith("~/") || inputPath.startsWith("~\\")) {
-    return path.join(os.homedir(), inputPath.slice(2));
-  }
-  return inputPath;
-}
+const argv = process.argv.slice(2);
 
-function getAssistants(ai) {
-  if (!ai || ai === "all") return Object.keys(supportedAssistants);
-  if (!supportedAssistants[ai]) {
-    throw new Error(`Unsupported assistant "${ai}". Supported values: codex, claude, gemini, all.`);
-  }
-  return [ai];
-}
-
-function getSkillsDir(options, assistant) {
-  if (options.target) {
-    return path.resolve(expandHome(options.target));
+// Interactive mode: no args or bare "install"
+if (isInteractive(argv)) {
+  if (!process.stdout.isTTY) {
+    console.log(
+      "Non-interactive terminal detected. Use flags: --ai <name> [--global] [--setup-renderer]"
+    );
+    console.log("Example: npx excalidraw-diagram-skill install --ai claude");
+    process.exit(1);
   }
 
-  const config = supportedAssistants[assistant];
-
-  if (options.global) {
-    const globalBase = process.env[config.globalBaseEnv]
-      ? path.resolve(expandHome(process.env[config.globalBaseEnv]))
-      : path.join(os.homedir(), config.globalBaseDir);
-    return path.join(globalBase, "skills");
-  }
-
-  return path.join(process.cwd(), ...config.projectSkillsDir);
-}
-
-function copyDir(src, dest) {
-  fs.mkdirSync(dest, { recursive: true });
-  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-    if (entry.name === "__pycache__" || entry.name === ".DS_Store") continue;
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
-    if (entry.isDirectory()) {
-      copyDir(srcPath, destPath);
-    } else {
-      fs.copyFileSync(srcPath, destPath);
-    }
-  }
-}
-
-function install(options) {
-  if (!fs.existsSync(sourceSkillDir)) {
-    throw new Error(`Bundled skill not found: ${sourceSkillDir}`);
-  }
-
-  const assistants = getAssistants(options.ai);
-  if (options.target && assistants.length > 1) {
-    throw new Error("--target can only be used with a single --ai value.");
-  }
-
-  const installs = assistants.map((assistant) => {
-    const skillsDir = getSkillsDir(options, assistant);
-    return {
-      assistant,
-      label: supportedAssistants[assistant].label,
-      skillsDir,
-      destSkillDir: path.join(skillsDir, skillName),
-    };
+  import("../dist/cli.js").then((mod) => {
+    mod.run();
+  }).catch((err) => {
+    console.error("Failed to start interactive mode:", err.message);
+    console.error("Run with --help for non-interactive usage.");
+    process.exit(1);
   });
-
-  console.log(`Source: ${sourceSkillDir}`);
-  for (const item of installs) {
-    console.log(`${item.label}: ${item.destSkillDir}`);
-  }
-
-  if (options.dryRun) {
-    console.log("Dry run complete. No files were copied.");
-    return;
-  }
-
-  if (!options.force) {
-    for (const item of installs) {
-      if (fs.existsSync(item.destSkillDir)) {
-        throw new Error(`Skill already exists at ${item.destSkillDir}. Re-run with --force to overwrite.`);
-      }
+} else {
+  // Flag-based mode: import the installer and run directly
+  import("../dist/installer.js").then((mod) => {
+    if (argv.includes("-h") || argv.includes("--help")) {
+      mod.printHelp();
+      process.exit(0);
     }
-  }
 
-  for (const item of installs) {
-    if (fs.existsSync(item.destSkillDir)) {
-      fs.rmSync(item.destSkillDir, { recursive: true, force: true });
+    const options = parseArgs(argv);
+
+    if (options.help || options.command === "help") {
+      mod.printHelp();
+      process.exit(0);
     }
-    fs.mkdirSync(item.skillsDir, { recursive: true });
-    copyDir(sourceSkillDir, item.destSkillDir);
-  }
 
-  console.log("");
-  console.log(`Installed Excalidraw Diagram skill for ${installs.map((item) => item.label).join(", ")}.`);
-  console.log("");
-  console.log("Optional renderer setup:");
-  console.log(`  python -m pip install -r "<installed-skill-dir>/scripts/requirements.txt"`);
-  console.log("  python -m playwright install chromium");
-}
+    if (options.command !== "install" && options.command !== "init") {
+      throw new Error(`Unknown command: ${options.command}`);
+    }
 
-try {
-  const options = parseArgs(process.argv.slice(2));
-  if (options.help || options.command === "help") {
-    printHelp();
-    process.exit(0);
-  }
-  if (options.command !== "install" && options.command !== "init") {
-    throw new Error(`Unknown command: ${options.command}`);
-  }
-  install(options);
-} catch (error) {
-  console.error(`Error: ${error.message}`);
-  console.error("Run with --help for usage.");
-  process.exit(1);
+    mod.install(options);
+  }).catch((err) => {
+    console.error(`Error: ${err.message}`);
+    console.error("Run with --help for usage.");
+    process.exit(1);
+  });
 }

@@ -9,13 +9,16 @@
   },
   "files": [
     "bin",
+    "dist",
     "skills",
     "skill.json",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "test": "node ./bin/excalidraw-diagram-skill.js --help && node ./bin/excalidraw-diagram-skill.js install --ai codex --dry-run && node ./bin/excalidraw-diagram-skill.js install --ai claude --dry-run && node ./bin/excalidraw-diagram-skill.js install --ai gemini --dry-run && node ./bin/excalidraw-diagram-skill.js install --ai all --dry-run"
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "npm run build && node ./bin/excalidraw-diagram-skill.js --help && node ./bin/excalidraw-diagram-skill.js install --ai codex --dry-run && node ./bin/excalidraw-diagram-skill.js install --ai claude --dry-run && node ./bin/excalidraw-diagram-skill.js install --ai gemini --dry-run && node ./bin/excalidraw-diagram-skill.js install --ai all --dry-run"
   },
   "keywords": [
     "codex",
@@ -43,5 +46,16 @@
   "homepage": "https://github.com/duynd0909/excalidraw-diagram-skill#readme",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@inkjs/ui": "^2.0.0",
+    "ink": "^7.0.2",
+    "react": "^19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.7.0",
+    "@types/react": "^19.2.14",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
   }
 }
