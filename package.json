@@ -1,0 +1,43 @@
+{
+  "name": "excalidraw-diagram-skill",
+  "version": "0.1.0",
+  "description": "Codex skill for creating, rendering, and validating Excalidraw architecture and workflow diagrams.",
+  "type": "module",
+  "bin": {
+    "excalidraw-diagram-skill": "./bin/excalidraw-diagram-skill.js",
+    "excalidraw-skill": "./bin/excalidraw-diagram-skill.js"
+  },
+  "files": [
+    "bin",
+    "skills",
+    "skill.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node ./bin/excalidraw-diagram-skill.js --help && node ./bin/excalidraw-diagram-skill.js install --dry-run"
+  },
+  "keywords": [
+    "codex",
+    "skill",
+    "ai-skill",
+    "excalidraw",
+    "diagram",
+    "architecture",
+    "workflow",
+    "visualization"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_GITHUB_USERNAME/excalidraw-diagram-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_GITHUB_USERNAME/excalidraw-diagram-skill/issues"
+  },
+  "homepage": "https://github.com/YOUR_GITHUB_USERNAME/excalidraw-diagram-skill#readme",
+  "engines": {
+    "node": ">=18"
+  }
+}
