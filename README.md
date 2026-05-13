@@ -75,11 +75,11 @@ excalidraw-diagram-skill install --target ~/.codex/skills --force
 
 ## Supported Assistants
 
-| Assistant | Project install path | Global install path |
-| --- | --- | --- |
-| Codex | `.codex/skills/excalidraw-diagram` | `~/.codex/skills/excalidraw-diagram` |
+| Assistant   | Project install path                | Global install path                   |
+| ----------- | ----------------------------------- | ------------------------------------- |
+| Codex       | `.codex/skills/excalidraw-diagram`  | `~/.codex/skills/excalidraw-diagram`  |
 | Claude Code | `.claude/skills/excalidraw-diagram` | `~/.claude/skills/excalidraw-diagram` |
-| Gemini CLI | `.gemini/skills/excalidraw-diagram` | `~/.gemini/skills/excalidraw-diagram` |
+| Gemini CLI  | `.gemini/skills/excalidraw-diagram` | `~/.gemini/skills/excalidraw-diagram` |
 
 ## Usage
 
@@ -115,18 +115,6 @@ skills/excalidraw-diagram/     # Bundled SKILL.md skill
 bin/excalidraw-diagram-skill.js # npm installer CLI
 skill.json                     # Skill metadata
 package.json                   # npm package metadata
-```
-
-## Publishing
-
-1. Replace `YOUR_GITHUB_USERNAME` in `package.json` and `skill.json`.
-2. Create a public GitHub repository named `excalidraw-diagram-skill`.
-3. Push this folder.
-4. Publish the npm package:
-
-```bash
-npm login
-npm publish --access public
 ```
 
 ## License
