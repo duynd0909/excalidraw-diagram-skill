@@ -16,9 +16,24 @@
     "ai-skill"
   ],
   "platforms": [
-    "codex",
     "claude",
-    "gemini"
+    "cursor",
+    "windsurf",
+    "antigravity",
+    "copilot",
+    "kiro",
+    "codex",
+    "roocode",
+    "qoder",
+    "gemini",
+    "trae",
+    "opencode",
+    "continue",
+    "codebuddy",
+    "droid",
+    "kilocode",
+    "warp",
+    "augment"
   ],
-  "install": "npx excalidraw-diagram-skill install --ai {{platform}}"
+  "install": "npx excalidraw-skill install --ai {{platform}}"
 }

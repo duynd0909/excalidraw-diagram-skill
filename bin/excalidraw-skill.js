@@ -71,7 +71,7 @@ if (isInteractive(argv)) {
     console.log(
       "Non-interactive terminal detected. Use flags: --ai <name> [--global] [--setup-renderer]"
     );
-    console.log("Example: npx excalidraw-diagram-skill install --ai claude");
+    console.log("Example: npx excalidraw-skill install --ai claude");
     process.exit(1);
   }
 
@@ -99,6 +99,11 @@ if (isInteractive(argv)) {
 
     if (options.command !== "install" && options.command !== "init") {
       throw new Error(`Unknown command: ${options.command}`);
+    }
+
+    // Resolve aliases (e.g. gemni -> gemini, openai -> codex)
+    if (options.ai) {
+      options.ai = mod.resolveAlias(options.ai);
     }
 
     mod.install(options);

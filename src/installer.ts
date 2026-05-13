@@ -17,28 +17,153 @@ export interface AssistantConfig {
   projectSkillsDir: string[];
   globalBaseEnv: string;
   globalBaseDir: string;
+  agentConfigFile: string;
 }
 
 export const supportedAssistants: Record<string, AssistantConfig> = {
-  codex: {
-    label: "Codex",
-    projectSkillsDir: [".codex", "skills"],
-    globalBaseEnv: "CODEX_HOME",
-    globalBaseDir: ".codex",
-  },
   claude: {
     label: "Claude Code",
     projectSkillsDir: [".claude", "skills"],
     globalBaseEnv: "CLAUDE_HOME",
     globalBaseDir: ".claude",
+    agentConfigFile: "claude.yaml",
+  },
+  cursor: {
+    label: "Cursor",
+    projectSkillsDir: [".cursor", "skills"],
+    globalBaseEnv: "CURSOR_HOME",
+    globalBaseDir: ".cursor",
+    agentConfigFile: "cursor.yaml",
+  },
+  windsurf: {
+    label: "Windsurf",
+    projectSkillsDir: [".windsurf", "skills"],
+    globalBaseEnv: "WINDSURF_HOME",
+    globalBaseDir: ".windsurf",
+    agentConfigFile: "windsurf.yaml",
+  },
+  antigravity: {
+    label: "Antigravity",
+    projectSkillsDir: [".agents", "skills"],
+    globalBaseEnv: "AGENTS_HOME",
+    globalBaseDir: ".agents",
+    agentConfigFile: "agent.yaml",
+  },
+  copilot: {
+    label: "GitHub Copilot",
+    projectSkillsDir: [".github", "prompts"],
+    globalBaseEnv: "GITHUB_HOME",
+    globalBaseDir: ".github",
+    agentConfigFile: "copilot.yaml",
+  },
+  kiro: {
+    label: "Kiro",
+    projectSkillsDir: [".kiro", "steering"],
+    globalBaseEnv: "KIRO_HOME",
+    globalBaseDir: ".kiro",
+    agentConfigFile: "kiro.yaml",
+  },
+  codex: {
+    label: "Codex",
+    projectSkillsDir: [".codex", "skills"],
+    globalBaseEnv: "CODEX_HOME",
+    globalBaseDir: ".codex",
+    agentConfigFile: "openai.yaml",
+  },
+  roocode: {
+    label: "Roo Code",
+    projectSkillsDir: [".roo", "skills"],
+    globalBaseEnv: "ROO_HOME",
+    globalBaseDir: ".roo",
+    agentConfigFile: "roocode.yaml",
+  },
+  qoder: {
+    label: "Qoder",
+    projectSkillsDir: [".qoder", "skills"],
+    globalBaseEnv: "QODER_HOME",
+    globalBaseDir: ".qoder",
+    agentConfigFile: "qoder.yaml",
   },
   gemini: {
     label: "Gemini CLI",
     projectSkillsDir: [".gemini", "skills"],
     globalBaseEnv: "GEMINI_HOME",
     globalBaseDir: ".gemini",
+    agentConfigFile: "gemini.yaml",
+  },
+  trae: {
+    label: "Trae",
+    projectSkillsDir: [".trae", "skills"],
+    globalBaseEnv: "TRAE_HOME",
+    globalBaseDir: ".trae",
+    agentConfigFile: "trae.yaml",
+  },
+  opencode: {
+    label: "OpenCode",
+    projectSkillsDir: [".opencode", "skills"],
+    globalBaseEnv: "OPENCODE_HOME",
+    globalBaseDir: ".opencode",
+    agentConfigFile: "opencode.yaml",
+  },
+  continue: {
+    label: "Continue",
+    projectSkillsDir: [".continue", "skills"],
+    globalBaseEnv: "CONTINUE_HOME",
+    globalBaseDir: ".continue",
+    agentConfigFile: "continue.yaml",
+  },
+  codebuddy: {
+    label: "CodeBuddy",
+    projectSkillsDir: [".codebuddy", "skills"],
+    globalBaseEnv: "CODEBUDDY_HOME",
+    globalBaseDir: ".codebuddy",
+    agentConfigFile: "codebuddy.yaml",
+  },
+  droid: {
+    label: "Droid (Factory)",
+    projectSkillsDir: [".factory", "skills"],
+    globalBaseEnv: "FACTORY_HOME",
+    globalBaseDir: ".factory",
+    agentConfigFile: "droid.yaml",
+  },
+  kilocode: {
+    label: "KiloCode",
+    projectSkillsDir: [".kilocode", "skills"],
+    globalBaseEnv: "KILOCODE_HOME",
+    globalBaseDir: ".kilocode",
+    agentConfigFile: "kilocode.yaml",
+  },
+  warp: {
+    label: "Warp",
+    projectSkillsDir: [".warp", "skills"],
+    globalBaseEnv: "WARP_HOME",
+    globalBaseDir: ".warp",
+    agentConfigFile: "warp.yaml",
+  },
+  augment: {
+    label: "Augment",
+    projectSkillsDir: [".augment", "skills"],
+    globalBaseEnv: "AUGMENT_HOME",
+    globalBaseDir: ".augment",
+    agentConfigFile: "augment.yaml",
   },
 };
+
+export const AI_ALIASES: Record<string, string> = {
+  gemni: "gemini",
+  gemimi: "gemini",
+  openai: "codex",
+  roo: "roocode",
+  "roo-code": "roocode",
+  "github-copilot": "copilot",
+  "kilo-code": "kilocode",
+  "code-buddy": "codebuddy",
+};
+
+export function resolveAlias(ai: string): string {
+  const lower = ai.toLowerCase().trim();
+  return AI_ALIASES[lower] ?? lower;
+}
 
 export interface InstallOptions {
   ai: string;
@@ -67,12 +192,14 @@ export function expandHome(inputPath: string): string {
 
 export function getAssistants(ai: string): string[] {
   if (!ai || ai === "all") return Object.keys(supportedAssistants);
-  if (!supportedAssistants[ai]) {
+  const resolved = resolveAlias(ai);
+  if (!supportedAssistants[resolved]) {
+    const validList = [...Object.keys(supportedAssistants), "all"].join(", ");
     throw new Error(
-      `Unsupported assistant "${ai}". Supported values: codex, claude, gemini, all.`
+      `Unsupported assistant "${ai}". Supported values: ${validList}.`
     );
   }
-  return [ai];
+  return [resolved];
 }
 
 export function getSkillsDir(
@@ -95,14 +222,19 @@ export function getSkillsDir(
   return path.join(process.cwd(), ...config.projectSkillsDir);
 }
 
-function copyDir(src: string, dest: string): void {
+function copyDirFiltered(
+  src: string,
+  dest: string,
+  excludeDir: string | null
+): void {
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
     if (entry.name === "__pycache__" || entry.name === ".DS_Store") continue;
+    if (excludeDir && entry.isDirectory() && entry.name === excludeDir) continue;
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
     if (entry.isDirectory()) {
-      copyDir(srcPath, destPath);
+      copyDirFiltered(srcPath, destPath, null);
     } else {
       fs.copyFileSync(srcPath, destPath);
     }
@@ -139,12 +271,35 @@ export function runInstall(
   options: InstallOptions,
   installs: InstallResult[]
 ): void {
+  const agentsSrcDir = path.join(sourceSkillDir, "agents");
+
   for (const item of installs) {
     if (fs.existsSync(item.destSkillDir)) {
       fs.rmSync(item.destSkillDir, { recursive: true, force: true });
     }
     fs.mkdirSync(item.skillsDir, { recursive: true });
-    copyDir(sourceSkillDir, item.destSkillDir);
+
+    // Copy everything except agents/ directory
+    copyDirFiltered(sourceSkillDir, item.destSkillDir, "agents");
+
+    // Copy the relevant agent config file(s)
+    const agentsDestDir = path.join(item.destSkillDir, "agents");
+    fs.mkdirSync(agentsDestDir, { recursive: true });
+
+    if (options.ai === "all") {
+      for (const entry of fs.readdirSync(agentsSrcDir)) {
+        const srcPath = path.join(agentsSrcDir, entry);
+        if (fs.statSync(srcPath).isFile()) {
+          fs.copyFileSync(srcPath, path.join(agentsDestDir, entry));
+        }
+      }
+    } else {
+      const config = supportedAssistants[item.assistant];
+      const agentSrcFile = path.join(agentsSrcDir, config.agentConfigFile);
+      if (fs.existsSync(agentSrcFile)) {
+        fs.copyFileSync(agentSrcFile, path.join(agentsDestDir, config.agentConfigFile));
+      }
+    }
   }
 }
 
@@ -220,11 +375,13 @@ export function printHelp(): void {
   console.log(`Excalidraw Diagram Skill installer
 
 Usage:
-  excalidraw-diagram-skill install [options]
   excalidraw-skill install [options]
 
 Options:
-  --ai <name>       Target assistant: codex, claude, gemini, or all. Default: codex
+  --ai <name>       Target assistant: claude, cursor, windsurf, antigravity,
+                    copilot, kiro, codex, roocode, qoder, gemini, trae,
+                    opencode, continue, codebuddy, droid, kilocode, warp,
+                    augment, or all. Default: codex
   --global          Install to the assistant's global skills directory
   --target <dir>    Install into a custom skills directory. Not valid with --ai all
   --force           Overwrite an existing excalidraw-diagram skill
@@ -232,13 +389,19 @@ Options:
   --dry-run         Show what would happen without copying files
   -h, --help        Show this help
 
+Aliases:
+  openai → codex, gemni/gemimi → gemini, roo/roo-code → roocode,
+  github-copilot → copilot, kilo-code → kilocode, code-buddy → codebuddy
+
 Examples:
-  npx excalidraw-diagram-skill install
-  npx excalidraw-diagram-skill install --ai claude
-  npx excalidraw-diagram-skill install --ai gemini
-  npx excalidraw-diagram-skill install --ai all
-  npx excalidraw-diagram-skill install --global
-  npx excalidraw-diagram-skill install --global --setup-renderer
-  npx excalidraw-diagram-skill install --target ~/.codex/skills --force
+  npx excalidraw-skill install
+  npx excalidraw-skill install --ai claude
+  npx excalidraw-skill install --ai gemini
+  npx excalidraw-skill install --ai cursor
+  npx excalidraw-skill install --ai copilot
+  npx excalidraw-skill install --ai all
+  npx excalidraw-skill install --global
+  npx excalidraw-skill install --global --setup-renderer
+  npx excalidraw-skill install --target ~/.codex/skills --force
 `);
 }

@@ -21,7 +21,7 @@ This compiles `src/` to `dist/`. Run this after any changes to `src/installer.ts
 Run the CLI with no arguments to launch the interactive Ink TUI:
 
 ```bash
-node bin/excalidraw-diagram-skill.js
+node bin/excalidraw-skill.js
 ```
 
 You should see an interactive menu to:
@@ -35,7 +35,7 @@ Press Escape at any step to cancel.
 To test non-TTY fallback:
 
 ```bash
-echo "" | node bin/excalidraw-diagram-skill.js
+echo "" | node bin/excalidraw-skill.js
 ```
 
 Should print a message about using flags instead.
@@ -53,9 +53,9 @@ This validates install for Codex, Claude, and Gemini in dry-run mode.
 To test a specific platform:
 
 ```bash
-node bin/excalidraw-diagram-skill.js install --ai claude --dry-run
-node bin/excalidraw-diagram-skill.js install --ai codex --dry-run
-node bin/excalidraw-diagram-skill.js install --ai gemini --dry-run
+node bin/excalidraw-skill.js install --ai claude --dry-run
+node bin/excalidraw-skill.js install --ai codex --dry-run
+node bin/excalidraw-skill.js install --ai gemini --dry-run
 ```
 
 ## 2. Install the skill locally
@@ -63,19 +63,19 @@ node bin/excalidraw-diagram-skill.js install --ai gemini --dry-run
 Install into the current project so Claude Code picks it up:
 
 ```bash
-node bin/excalidraw-diagram-skill.js install --ai claude
+node bin/excalidraw-skill.js install --ai claude
 ```
 
 For global availability across all projects:
 
 ```bash
-node bin/excalidraw-diagram-skill.js install --ai claude --global
+node bin/excalidraw-skill.js install --ai claude --global
 ```
 
 To reinstall after changes, add `--force`:
 
 ```bash
-node bin/excalidraw-diagram-skill.js install --ai claude --force
+node bin/excalidraw-skill.js install --ai claude --force
 ```
 
 Verify the files landed:
@@ -93,7 +93,7 @@ A sample diagram is provided at `test/test-diagram.excalidraw`. Use it to verify
 Install renderer dependencies (can also be done during skill install with `--setup-renderer`):
 
 ```bash
-node bin/excalidraw-diagram-skill.js install --ai claude --setup-renderer
+node bin/excalidraw-skill.js install --ai claude --setup-renderer
 ```
 
 Or install manually:
@@ -139,7 +139,7 @@ Check the generated `.excalidraw` file for:
 If you edit the skill source under `skills/excalidraw-diagram/`:
 
 ```bash
-node bin/excalidraw-diagram-skill.js install --ai claude --force
+node bin/excalidraw-skill.js install --ai claude --force
 ```
 
 Then restart the assistant to pick up the updated skill files.

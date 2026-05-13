@@ -1,11 +1,10 @@
 {
-  "name": "excalidraw-diagram-skill",
+  "name": "excalidraw-skill",
   "version": "0.1.0",
-  "description": "Agent skill for creating, rendering, and validating Excalidraw architecture and workflow diagrams in Codex, Claude Code, and Gemini CLI.",
+  "description": "Agent skill for creating, rendering, and validating Excalidraw architecture and workflow diagrams in Claude Code, Codex, Gemini CLI, Cursor, Windsurf, Copilot, Kiro, Roo Code, and more.",
   "type": "module",
   "bin": {
-    "excalidraw-diagram-skill": "./bin/excalidraw-diagram-skill.js",
-    "excalidraw-skill": "./bin/excalidraw-diagram-skill.js"
+    "excalidraw-skill": "./bin/excalidraw-skill.js"
   },
   "files": [
     "bin",
@@ -18,14 +17,30 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "test": "npm run build && node ./bin/excalidraw-diagram-skill.js --help && node ./bin/excalidraw-diagram-skill.js install --ai codex --dry-run && node ./bin/excalidraw-diagram-skill.js install --ai claude --dry-run && node ./bin/excalidraw-diagram-skill.js install --ai gemini --dry-run && node ./bin/excalidraw-diagram-skill.js install --ai all --dry-run"
+    "test": "npm run build && node ./bin/excalidraw-skill.js --help && node ./bin/excalidraw-skill.js install --ai codex --dry-run && node ./bin/excalidraw-skill.js install --ai claude --dry-run && node ./bin/excalidraw-skill.js install --ai gemini --dry-run && node ./bin/excalidraw-skill.js install --ai cursor --dry-run && node ./bin/excalidraw-skill.js install --ai copilot --dry-run && node ./bin/excalidraw-skill.js install --ai all --dry-run && node ./bin/excalidraw-skill.js install --ai gemni --dry-run"
   },
   "keywords": [
     "codex",
     "claude",
+    "claude-code",
     "gemini",
     "gemini-cli",
-    "claude-code",
+    "cursor",
+    "windsurf",
+    "copilot",
+    "github-copilot",
+    "kiro",
+    "roocode",
+    "qoder",
+    "trae",
+    "opencode",
+    "continue",
+    "codebuddy",
+    "droid",
+    "kilocode",
+    "warp",
+    "augment",
+    "antigravity",
     "skill",
     "ai-skill",
     "excalidraw",
@@ -34,7 +49,7 @@
     "workflow",
     "visualization"
   ],
-  "author": "",
+  "author": "Dave Nguyen",
   "license": "MIT",
   "repository": {
     "type": "git",
