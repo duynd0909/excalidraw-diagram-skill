@@ -10,6 +10,26 @@ const __dirname = path.dirname(__filename);
 const packageRoot = path.resolve(__dirname, "..");
 const skillName = "excalidraw-diagram";
 const sourceSkillDir = path.join(packageRoot, "skills", skillName);
+const supportedAssistants = {
+  codex: {
+    label: "Codex",
+    projectSkillsDir: [".codex", "skills"],
+    globalBaseEnv: "CODEX_HOME",
+    globalBaseDir: ".codex",
+  },
+  claude: {
+    label: "Claude Code",
+    projectSkillsDir: [".claude", "skills"],
+    globalBaseEnv: "CLAUDE_HOME",
+    globalBaseDir: ".claude",
+  },
+  gemini: {
+    label: "Gemini CLI",
+    projectSkillsDir: [".gemini", "skills"],
+    globalBaseEnv: "GEMINI_HOME",
+    globalBaseDir: ".gemini",
+  },
+};
 
 function printHelp() {
   console.log(`Excalidraw Diagram Skill installer
@@ -19,15 +39,18 @@ Usage:
   excalidraw-skill install [options]
 
 Options:
-  --ai codex        Target assistant. Only "codex" is supported in this package. Default: codex
-  --global          Install to CODEX_HOME/skills or ~/.codex/skills instead of this project
-  --target <dir>    Install into a custom skills directory
+  --ai <name>       Target assistant: codex, claude, gemini, or all. Default: codex
+  --global          Install to the assistant's global skills directory
+  --target <dir>    Install into a custom skills directory. Not valid with --ai all
   --force           Overwrite an existing excalidraw-diagram skill
   --dry-run         Show what would happen without copying files
   -h, --help        Show this help
 
 Examples:
   npx excalidraw-diagram-skill install
+  npx excalidraw-diagram-skill install --ai claude
+  npx excalidraw-diagram-skill install --ai gemini
+  npx excalidraw-diagram-skill install --ai all
   npx excalidraw-diagram-skill install --global
   npx excalidraw-diagram-skill install --target ~/.codex/skills --force
 `);
@@ -88,19 +111,29 @@ function expandHome(inputPath) {
   return inputPath;
 }
 
-function getSkillsDir(options) {
+function getAssistants(ai) {
+  if (!ai || ai === "all") return Object.keys(supportedAssistants);
+  if (!supportedAssistants[ai]) {
+    throw new Error(`Unsupported assistant "${ai}". Supported values: codex, claude, gemini, all.`);
+  }
+  return [ai];
+}
+
+function getSkillsDir(options, assistant) {
   if (options.target) {
     return path.resolve(expandHome(options.target));
   }
 
+  const config = supportedAssistants[assistant];
+
   if (options.global) {
-    const codexHome = process.env.CODEX_HOME
-      ? path.resolve(expandHome(process.env.CODEX_HOME))
-      : path.join(os.homedir(), ".codex");
-    return path.join(codexHome, "skills");
+    const globalBase = process.env[config.globalBaseEnv]
+      ? path.resolve(expandHome(process.env[config.globalBaseEnv]))
+      : path.join(os.homedir(), config.globalBaseDir);
+    return path.join(globalBase, "skills");
   }
 
-  return path.join(process.cwd(), ".codex", "skills");
+  return path.join(process.cwd(), ...config.projectSkillsDir);
 }
 
 function copyDir(src, dest) {
@@ -118,40 +151,56 @@ function copyDir(src, dest) {
 }
 
 function install(options) {
-  if (options.ai !== "codex") {
-    throw new Error(`Unsupported assistant "${options.ai}". This package currently installs the Codex skill only.`);
-  }
-
   if (!fs.existsSync(sourceSkillDir)) {
     throw new Error(`Bundled skill not found: ${sourceSkillDir}`);
   }
 
-  const skillsDir = getSkillsDir(options);
-  const destSkillDir = path.join(skillsDir, skillName);
+  const assistants = getAssistants(options.ai);
+  if (options.target && assistants.length > 1) {
+    throw new Error("--target can only be used with a single --ai value.");
+  }
 
-  console.log(`Source:      ${sourceSkillDir}`);
-  console.log(`Destination: ${destSkillDir}`);
+  const installs = assistants.map((assistant) => {
+    const skillsDir = getSkillsDir(options, assistant);
+    return {
+      assistant,
+      label: supportedAssistants[assistant].label,
+      skillsDir,
+      destSkillDir: path.join(skillsDir, skillName),
+    };
+  });
+
+  console.log(`Source: ${sourceSkillDir}`);
+  for (const item of installs) {
+    console.log(`${item.label}: ${item.destSkillDir}`);
+  }
 
   if (options.dryRun) {
     console.log("Dry run complete. No files were copied.");
     return;
   }
 
-  if (fs.existsSync(destSkillDir)) {
-    if (!options.force) {
-      throw new Error(`Skill already exists at ${destSkillDir}. Re-run with --force to overwrite.`);
+  if (!options.force) {
+    for (const item of installs) {
+      if (fs.existsSync(item.destSkillDir)) {
+        throw new Error(`Skill already exists at ${item.destSkillDir}. Re-run with --force to overwrite.`);
+      }
     }
-    fs.rmSync(destSkillDir, { recursive: true, force: true });
   }
 
-  fs.mkdirSync(skillsDir, { recursive: true });
-  copyDir(sourceSkillDir, destSkillDir);
+  for (const item of installs) {
+    if (fs.existsSync(item.destSkillDir)) {
+      fs.rmSync(item.destSkillDir, { recursive: true, force: true });
+    }
+    fs.mkdirSync(item.skillsDir, { recursive: true });
+    copyDir(sourceSkillDir, item.destSkillDir);
+  }
 
   console.log("");
-  console.log("Installed Excalidraw Diagram skill for Codex.");
+  console.log(`Installed Excalidraw Diagram skill for ${installs.map((item) => item.label).join(", ")}.`);
   console.log("");
   console.log("Optional renderer setup:");
-  console.log(`  python -m pip install -r "${path.join(destSkillDir, "scripts", "requirements.txt")}"`);
+  console.log(`  python -m pip install -r "<installed-skill-dir>/scripts/requirements.txt"`);
   console.log("  python -m playwright install chromium");
 }
 

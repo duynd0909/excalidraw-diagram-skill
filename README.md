@@ -1,6 +1,6 @@
 # Excalidraw Diagram Skill
 
-Codex skill for creating `.excalidraw` JSON diagrams that make visual arguments for workflows, architectures, systems, protocols, and concepts.
+Agent skill for creating `.excalidraw` JSON diagrams that make visual arguments for workflows, architectures, systems, protocols, and concepts.
 
 The skill includes:
 
@@ -14,7 +14,7 @@ The skill includes:
 
 ```bash
 npm install -g excalidraw-diagram-skill
-excalidraw-diagram-skill install
+excalidraw-diagram-skill install --ai codex
 ```
 
 Or run it without a global install:
@@ -23,16 +23,48 @@ Or run it without a global install:
 npx excalidraw-diagram-skill install
 ```
 
-By default this installs to the current project:
+By default this installs for Codex in the current project:
 
 ```text
 .codex/skills/excalidraw-diagram
 ```
 
+Install for Claude Code:
+
+```bash
+excalidraw-diagram-skill install --ai claude
+```
+
+This installs to:
+
+```text
+.claude/skills/excalidraw-diagram
+```
+
+Install for Gemini CLI:
+
+```bash
+excalidraw-diagram-skill install --ai gemini
+```
+
+This installs to:
+
+```text
+.gemini/skills/excalidraw-diagram
+```
+
+Install for all supported assistants:
+
+```bash
+excalidraw-diagram-skill install --ai all
+```
+
 Global install:
 
 ```bash
-excalidraw-diagram-skill install --global
+excalidraw-diagram-skill install --ai codex --global
+excalidraw-diagram-skill install --ai claude --global
+excalidraw-diagram-skill install --ai gemini --global
 ```
 
 Custom skills directory:
@@ -41,9 +73,17 @@ Custom skills directory:
 excalidraw-diagram-skill install --target ~/.codex/skills --force
 ```
 
+## Supported Assistants
+
+| Assistant | Project install path | Global install path |
+| --- | --- | --- |
+| Codex | `.codex/skills/excalidraw-diagram` | `~/.codex/skills/excalidraw-diagram` |
+| Claude Code | `.claude/skills/excalidraw-diagram` | `~/.claude/skills/excalidraw-diagram` |
+| Gemini CLI | `.gemini/skills/excalidraw-diagram` | `~/.gemini/skills/excalidraw-diagram` |
+
 ## Usage
 
-After installation, ask Codex for an Excalidraw diagram:
+After installation, ask your assistant for an Excalidraw diagram:
 
 ```text
 Use $excalidraw-diagram to create an Excalidraw architecture diagram for my data pipeline.
@@ -71,7 +111,7 @@ The renderer imports Excalidraw's browser bundle, so first-time rendering may re
 ## Repository Layout
 
 ```text
-skills/excalidraw-diagram/     # Bundled Codex skill
+skills/excalidraw-diagram/     # Bundled SKILL.md skill
 bin/excalidraw-diagram-skill.js # npm installer CLI
 skill.json                     # Skill metadata
 package.json                   # npm package metadata

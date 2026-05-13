@@ -35,7 +35,7 @@ Read `references/element-templates.md` when you need copyable JSON templates. Re
 
 5. Render, inspect, and fix.
    - Run the renderer in `scripts/render_excalidraw.py`.
-   - View the generated PNG with Codex image inspection tools.
+   - View the generated PNG with available image inspection tools.
    - Fix layout issues and re-render until the diagram is presentable.
 
 ## Visual Method
