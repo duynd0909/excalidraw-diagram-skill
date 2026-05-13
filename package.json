@@ -35,12 +35,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_GITHUB_USERNAME/excalidraw-diagram-skill.git"
+    "url": "git+https://github.com/duynd0909/excalidraw-diagram-skill.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_GITHUB_USERNAME/excalidraw-diagram-skill/issues"
+    "url": "https://github.com/duynd0909/excalidraw-diagram-skill/issues"
   },
-  "homepage": "https://github.com/YOUR_GITHUB_USERNAME/excalidraw-diagram-skill#readme",
+  "homepage": "https://github.com/duynd0909/excalidraw-diagram-skill#readme",
   "engines": {
     "node": ">=18"
   }

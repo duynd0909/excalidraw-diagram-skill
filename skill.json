@@ -4,7 +4,7 @@
   "description": "Create, edit, render, and validate Excalidraw .excalidraw JSON diagrams for workflows, architecture, systems, protocols, concepts, and visual arguments.",
   "version": "0.1.0",
   "license": "MIT",
-  "repository": "https://github.com/YOUR_GITHUB_USERNAME/excalidraw-diagram-skill",
+  "repository": "https://github.com/duynd0909/excalidraw-diagram-skill",
   "keywords": [
     "codex",
     "claude",
